@@ -6,16 +6,6 @@ import os, sys, json, sqlite3, shutil, hashlib, secrets, logging, time, hmac
 from datetime import datetime, date, timedelta
 from flask import Flask, jsonify, request, send_from_directory, session
 
-logging.basicConfig(
-    level=logging.INFO,
-    format='%(asctime)s [%(levelname)s] %(message)s',
-    handlers=[
-        logging.FileHandler(os.path.join(os.path.expanduser('~'), 'CTO_CallCenter_Datos', 'cto.log'), encoding='utf-8'),
-        logging.StreamHandler()
-    ]
-)
-logger = logging.getLogger('CTO')
-
 def get_base_dir():
     if getattr(sys, 'frozen', False): return os.path.dirname(sys.executable)
     return os.path.dirname(os.path.abspath(__file__))
@@ -28,6 +18,20 @@ BACKUP_DIR = os.path.join(DATA_DIR, 'respaldos')
 
 os.makedirs(DATA_DIR, exist_ok=True)
 os.makedirs(BACKUP_DIR, exist_ok=True)
+
+log_handlers = [logging.StreamHandler()]
+try:
+    log_file = os.path.join(DATA_DIR, 'cto.log')
+    log_handlers.append(logging.FileHandler(log_file, encoding='utf-8'))
+except Exception as e:
+    print(f"[CTO] Advertencia: No se pudo crear FileHandler para log ({e})")
+
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s [%(levelname)s] %(message)s',
+    handlers=log_handlers
+)
+logger = logging.getLogger('CTO')
 
 DB_INICIAL = os.path.join(BASE_DIR, 'callcenter_inicial.db')
 if not os.path.exists(DB_PATH) and os.path.exists(DB_INICIAL):
