@@ -1,0 +1,86 @@
+==========================================================
+  CTO CallCenter v9.0
+  Cooperativa de Taxis Occidental 119 — Quito, Ecuador
+==========================================================
+
+CÓMO EMPEZAR
+------------
+Doble clic en: CTO_CallCenter.bat
+
+La primera vez descarga Python (automático, ~2 minutos,
+requiere internet). Las siguientes veces abre directo,
+sin necesitar internet.
+
+El sistema abre en una ventana propia (usa Chrome o Edge
+en modo app — sin barra de direcciones, como programa
+de escritorio).
+
+CIERRE
+------
+Para cerrar el sistema, cierra la ventana del programa
+y la ventana negra de consola que quedó detrás.
+
+--------------------------------------------------------
+PARA LOS CONDUCTORES (app en su celular)
+--------------------------------------------------------
+Al abrir el sistema, la consola muestra una dirección así:
+
+    Otras PC / celular: http://192.168.1.XX:5199
+
+El conductor abre esa dirección + "/conductor" en el
+navegador de su celular (debe estar conectado al mismo
+WiFi que la central):
+
+    http://192.168.1.XX:5199/conductor
+
+Ahí ingresa:
+  - Su número de unidad (1 a 79)
+  - Los últimos 4 dígitos de su teléfono registrado
+
+--------------------------------------------------------
+PANEL DE UNIDADES EN TIEMPO REAL (para supervisión)
+--------------------------------------------------------
+    http://192.168.1.XX:5199/admin/unidades
+
+Muestra las 79 unidades con su estado (QAP, en viaje,
+demorada) actualizándose cada 10 segundos. Útil en una
+pantalla aparte o proyectada en la central.
+
+--------------------------------------------------------
+MÁS DE UNA OPERADORA AL MISMO TIEMPO
+--------------------------------------------------------
+El sistema soporta varias operadoras trabajando a la vez
+desde distintos computadores en la misma red. Cada una
+abre:
+
+    http://192.168.1.XX:5199
+
+(la IP que muestra la consola del computador donde se
+instaló el sistema — ese computador actúa como servidor
+central). Los viajes y el estado de las unidades se
+sincronizan automáticamente entre todas las pantallas.
+
+--------------------------------------------------------
+DATOS Y RESPALDOS
+--------------------------------------------------------
+La base de datos vive en:
+
+    C:\Users\[tu usuario]\CTO_CallCenter_Datos\callcenter.db
+
+Se hace un respaldo automático ahí mismo una vez al día.
+Desde el sistema, en Administración, también puedes:
+
+  - Hacer un respaldo manual en cualquier momento
+  - Copiar el respaldo a una memoria USB conectada
+
+--------------------------------------------------------
+ACCESO RÁPIDO DENTRO DEL SISTEMA
+--------------------------------------------------------
+  F2  → Registrar una unidad en QAP (disponible)
+  F3  → Llamada entrante (buscar/crear cliente y despachar)
+
+--------------------------------------------------------
+REPORTES Y EXPORTACIÓN
+--------------------------------------------------------
+  - Jornada del Día → Excel de viajes / Reporte PDF
+  - Contabilidad    → Excel de cobros del mes + morosos

@@ -1,0 +1,18 @@
+version: '3.8'
+
+services:
+  cto-callcenter:
+    build: .
+    container_name: cto_callcenter_web
+    restart: always
+    ports:
+      - "5199:5199"
+    environment:
+      - PORT=5199
+      - DATA_DIR=/app/data
+      - CTO_BACKUP_HORAS=6
+    volumes:
+      - cto_data:/app/data
+
+volumes:
+  cto_data:

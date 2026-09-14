@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#eef1f5">
+<title>CTO 119 — Sala de Espera</title>
+<link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@600;700&family=Nunito:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/leaflet.css">
+<script src="/leaflet.js"></script>
+<style>
+:root{
+  --bg:#eef1f5; --card:#ffffff; --line:#dbe4ee; --line2:#e9edf2;
+  --text:#141a21; --text2:#2b3440; --text3:#5b6675;
+  --green:#0e8a72; --green-dim:#def0ea;
+  --gold:#d97706; --gold-dim:#fdf3e2;
+  --blue:#1d5c9e; --cyan:#0e7c86; --red:#e5533d;
+  --shadow:0 4px 18px rgba(20,35,55,.10);
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Nunito',sans-serif;background:var(--bg);color:var(--text);overflow:hidden;height:100vh}
+.header{display:flex;align-items:center;gap:16px;padding:10px 20px;background:linear-gradient(90deg,#ffffff,#f4f7fb);border-bottom:1px solid var(--line)}
+.logo{width:52px;height:52px;background:var(--gold);border-radius:14px;display:flex;align-items:center;justify-content:center;font-family:'Rajdhani',sans-serif;font-size:26px;font-weight:700;color:#fff;flex-shrink:0}
+.brand .c{font-size:11px;color:var(--gold);letter-spacing:3px;text-transform:uppercase}
+.brand .t{font-family:'Rajdhani',sans-serif;font-size:26px;font-weight:700;line-height:1}
+.brand .s{font-size:11px;color:var(--text3)}
+.spacer{flex:1}
+.clock{text-align:right}
+.clock .time{font-family:'Rajdhani',sans-serif;font-size:34px;font-weight:700;line-height:1}
+.clock .date{font-size:12px;color:var(--text3)}
+.bot-pill{background:var(--line2);border:1px solid var(--line);border-radius:20px;padding:6px 14px;font-size:12px;font-weight:600}
+.bot-pill .dot{display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:6px}
+.main{display:grid;grid-template-columns:380px 1fr;grid-template-rows:1fr 300px;gap:12px;padding:12px;height:calc(100vh - 74px)}
+.panel{background:var(--card);border:1px solid var(--line);border-radius:14px;overflow:hidden;display:flex;flex-direction:column;box-shadow:var(--shadow)}
+.panel-title{padding:10px 14px;font-size:11px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--blue);border-bottom:1px solid var(--line2);background:var(--bg)}
+.panel-title .cnt{color:var(--text3)}
+.list{overflow-y:auto;padding:6px}
+.row{display:flex;align-items:center;gap:10px;padding:8px 10px;border-radius:8px;border-bottom:1px solid var(--line2)}
+.row:last-child{border-bottom:none}
+.u{font-family:'Rajdhani',sans-serif;font-size:20px;font-weight:700;color:var(--gold);width:40px;flex-shrink:0}
+.kpis{display:grid;grid-template-columns:repeat(5,1fr);gap:12px;margin:12px 0}
+.kpi{background:linear-gradient(160deg,#ffffff,#f4f7fb);border:1px solid var(--line);border-radius:12px;padding:16px;text-align:center}
+.kpi .v{font-family:'Rajdhani',sans-serif;font-size:40px;font-weight:700;line-height:1}
+.kpi .l{font-size:11px;color:var(--text3);margin-top:4px;text-transform:uppercase;letter-spacing:1px}
+.kpi.gold .v{color:var(--gold)}.kpi.cyan .v{color:var(--cyan)}.kpi.green .v{color:var(--green)}.kpi.red .v{color:var(--red)}
+#tv-map{flex:1;min-height:0}
+.trip-addr{font-size:13px;font-weight:600;flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.trip-meta{font-size:11px;color:var(--text3)}
+.minqap{font-size:10px;padding:2px 7px;border-radius:10px;font-weight:700}
+.legend{position:absolute;bottom:6px;left:12px;z-index:500;font-size:10px;color:var(--text3);background:rgba(255,255,255,.9);border:1px solid var(--line);padding:4px 8px;border-radius:6px}
+.blink{animation:blink 1.2s infinite}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.4}}
+::-webkit-scrollbar{width:6px;height:6px}
+::-webkit-scrollbar-thumb{background:#c9d2dc;border-radius:3px}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="logo">119</div>
+  <div class="brand">
+    <div class="c">Cooperativa de Taxis Occidental</div>
+    <div class="t">CTO CallCenter</div>
+    <div class="s">Servicio 24 horas · Pedro de la Peña y Rumihurco · El Condado</div>
+  </div>
+  <div class="spacer"></div>
+  <div class="bot-pill" id="bot-pill"><span class="dot" id="bot-dot" style="background:#5b6675"></span>Bot WhatsApp <span id="bot-txt">…</span></div>
+  <div class="clock">
+    <div class="time" id="clock-time">--:--</div>
+    <div class="date" id="clock-date">—</div>
+  </div>
+</div>
+
+<div class="main">
+  <div class="panel">
+    <div class="panel-title">🟢 Unidades en QAP <span class="cnt" id="qap-count"></span></div>
+    <div class="list" id="qap-list"></div>
+  </div>
+
+  <div style="display:flex;flex-direction:column;gap:12px;overflow:hidden">
+    <div class="kpis">
+      <div class="kpi cyan"><div class="v" id="k-qap">0</div><div class="l">Unid. en QAP</div></div>
+      <div class="kpi gold"><div class="v" id="k-viajes">0</div><div class="l">Viajes hoy</div></div>
+      <div class="kpi green"><div class="v" id="k-efec">0%</div><div class="l">Efectividad</div></div>
+      <div class="kpi cyan"><div class="v" id="k-rec">$0</div><div class="l">Recaudado mes</div></div>
+      <div class="kpi red"><div class="v" id="k-pico">-</div><div class="l">Hora pico</div></div>
+    </div>
+    <div class="panel" style="flex:1">
+      <div class="panel-title">🚕 Viajes en curso <span class="cnt" id="trip-count"></span></div>
+      <div class="list" id="trip-list"></div>
+    </div>
+  </div>
+
+  <div class="panel" style="grid-column:1 / -1;position:relative">
+    <div class="panel-title">🗺️ Mapa de Operaciones <span class="cnt">GPS en vivo</span></div>
+    <div id="tv-map"></div>
+    <div class="legend"><span style="color:var(--green)">■</span> QAP · <span style="color:var(--cyan)">●</span> En viaje · <span style="color:var(--gold)">★</span> CTO 119</div>
+  </div>
+</div>
+
+<script>
+const CTO_LAT=-0.061790, CTO_LNG=-78.489090;
+const SECTORES=[[-0.064,-78.489],[-0.055,-78.49],[-0.06,-78.48],[-0.052,-78.485],[-0.068,-78.495],[-0.048,-78.492],[-0.07,-78.485],[-0.058,-78.5],[-0.063,-78.475],[-0.047,-78.48]];
+let _cond=null,_act=null,_viajes=[],_ubic=[];
+
+const $=id=>document.getElementById(id);
+
+function qapUnidades(){
+  if(!_act) return [];
+  const byU={};
+  _act.forEach(a=>{
+    const u=a.numero_unidad;
+    if(!byU[u]||a.fecha_hora>byU[u].fecha_hora) byU[u]=a;
+  });
+  const hoy=new Date();
+  const hoyStr=hoy.getFullYear()+'-'+String(hoy.getMonth()+1).padStart(2,'0')+'-'+String(hoy.getDate()).padStart(2,'0');
+  return Object.entries(byU)
+    .filter(([,a])=>a.accion==='qap' && (a.fecha_hora||'').slice(0,10)===hoyStr)
+    .map(([u,a])=>{
+      const cond=_cond?.find(c=>c.unidad==Number(u));
+      let min=0;
+      try{ min=Math.floor((Date.now()-new Date(a.fecha_hora).getTime())/60000); }catch(e){}
+      return {unidad:Number(u),nombre:cond?.nombre||'—',placa:cond?.placa||'',min,minutos:min};
+    }).sort((a,b)=>a.unidad-b.unidad);
+}
+
+async function cargarDatos(){
+  try{
+    const [r1,r2,r3] = await Promise.all([
+      fetch('/api/estadisticas/kpis'),
+      fetch('/api/load/unidades_actividad'),
+      fetch('/api/load/viajes')
+    ]);
+    const kpi = await r1.json();
+    _act = await r2.json();
+    _viajes = await r3.json();
+    fetch('/api/load/conductores').then(r=>r.json()).then(d=>{ _cond=d; pintarQAP(); }).catch(()=>{});
+    pintarKPIs(kpi);
+    pintarQAP();
+    pintarTrips();
+  }catch(e){}
+}
+
+function pintarKPIs(k){
+  $('k-qap').textContent=k.unidades_activas||0;
+  $('k-viajes').textContent=k.viajes_hoy||0;
+  $('k-efec').textContent=(k.efectividad||0)+'%';
+  $('k-rec').textContent='$'+Math.round(k.recaudacion_mes||0);
+  $('k-pico').textContent=k.hora_pico||'-';
+}
+
+function pintarQAP(){
+  const qs=qapUnidades();
+  $('qap-count').textContent='· '+qs.length;
+  $('k-qap').textContent=qs.length;
+  $('qap-list').innerHTML = qs.length ? qs.map(q=>{
+    const c=q.min<15?'var(--green-dim)':'var(--gold-dim)';
+    const txt=q.min<15?'var(--green)':'var(--gold)';
+    return `<div class="row"><span class="u">U${q.unidad}</span>
+      <div style="flex:1;min-width:0">
+        <div style="font-size:13px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${(q.nombre||'').split(' ').slice(0,3).join(' ')}</div>
+        <div style="font-size:10px;color:var(--text3)">${q.placa||''}</div>
+      </div>
+      <span class="minqap" style="background:${c};color:${txt}">${q.min}m</span>
+    </div>`;
+  }).join('') : '<div style="padding:30px;text-align:center;color:var(--text3);font-size:13px">Sin unidades en QAP</div>';
+}
+
+function pintarTrips(){
+  const hoy=new Date().toLocaleDateString('es-EC');
+  const activos=_viajes.filter(v=>['asignado','en_curso','en_destino'].includes(v.estado) &&
+    new Date(v.fecha_asignacion||v.fecha_solicitud).toLocaleDateString('es-EC')===hoy).slice(0,8);
+  $('trip-count').textContent='· '+activos.length;
+  $('trip-list').innerHTML = activos.length ? activos.map(v=>`
+    <div class="row">
+      <span class="u" style="color:var(--cyan)">U${v.numero_unidad||'—'}</span>
+      <span class="trip-addr">📍 ${(v.direccion_recogida||'—').substring(0,42)}</span>
+      ${v.destino?`<span class="trip-meta">→ ${(v.destino||'').substring(0,20)}</span>`:''}
+      <span class="trip-meta">👤 ${(v.cliente_nombre||'').split(' ')[0]||'—'}</span>
+    </div>`).join('') : '<div style="padding:30px;text-align:center;color:var(--text3);font-size:13px">Sin viajes en curso</div>';
+}
+
+let _map=null,_markers=[];
+function initMap(){
+  if(typeof L==='undefined'){ $('tv-map').innerHTML='<div style="padding:30px;color:var(--text3)">Mapa no disponible</div>'; return; }
+  _map=L.map('tv-map',{zoomControl:false,attributionControl:false}).setView([CTO_LAT,CTO_LNG],13);
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:19}).addTo(_map);
+  L.marker([CTO_LAT,CTO_LNG],{icon:L.divIcon({html:'<div style="font-size:24px">🏢</div>',className:'',iconSize:[24,24],iconAnchor:[12,12]})}).addTo(_map);
+  L.circle([CTO_LAT,CTO_LNG],{radius:8000,color:'#1d5c9e',fillColor:'#1d5c9e',fillOpacity:.05,weight:1.5,dashArray:'6 4'}).addTo(_map);
+  actualizarMapa();
+}
+
+async function actualizarMapa(){
+  if(!_map) return;
+  try{ const r=await fetch('/api/ubicaciones'); if(r.ok) _ubic=await r.json(); }catch(e){}
+  _markers.forEach(m=>_map.removeLayer(m)); _markers=[];
+  const qs=qapUnidades();
+  qs.forEach(q=>{
+    const ub=_ubic.find(u=>u.unidad===q.unidad);
+    let lat,lng;
+    if(ub){ lat=ub.lat; lng=ub.lng; }
+    else { const s=SECTORES[q.unidad%SECTORES.length]; lat=s[0]+Math.sin(q.unidad*1.3)*0.018; lng=s[1]+Math.cos(q.unidad*0.9)*0.018; }
+    const c=q.min<15?'#0e8a72':q.min<30?'#d97706':'#e5533d';
+    const m=L.marker([lat,lng],{icon:L.divIcon({html:`<div style="background:${c};color:#fff;border-radius:7px;padding:2px 6px;font-size:11px;font-weight:800;white-space:nowrap;box-shadow:0 2px 8px rgba(0,0,0,.4);font-family:'Rajdhani',sans-serif">U${q.unidad}</div>`,className:'',iconSize:[34,20],iconAnchor:[17,10]})}).addTo(_map);
+    _markers.push(m);
+  });
+  const hoy=new Date().toLocaleDateString('es-EC');
+  const activos=_viajes.filter(v=>v.estado==='asignado'&&new Date(v.fecha_asignacion||v.fecha_solicitud).toLocaleDateString('es-EC')===hoy).slice(0,8);
+  activos.forEach(v=>{
+    const ub=_ubic.find(u=>u.unidad===v.numero_unidad);
+    let lat,lng;
+    if(ub){ lat=ub.lat; lng=ub.lng; }
+    else { const s=SECTORES[(v.numero_unidad||1)%SECTORES.length]; lat=s[0]+Math.sin((v.id||1)*2.1)*0.014; lng=s[1]+Math.cos((v.id||1)*1.7)*0.014; }
+    const m=L.marker([lat,lng],{icon:L.divIcon({html:'<div style="background:#0e7c86;color:#fff;border-radius:50%;width:22px;height:22px;display:flex;align-items:center;justify-content:center;font-size:11px;border:2px solid #9fe3e0">🚕</div>',className:'',iconSize:[22,22],iconAnchor:[11,11]})}).addTo(_map);
+    _markers.push(m);
+  });
+}
+
+async function estadoBot(){
+  try{
+    const r=await fetch('/api/bot/estado'); const d=await r.json();
+    const on=!!d.online;
+    $('bot-dot').style.background=on?'#0e8a72':'#e5533d';
+    $('bot-txt').textContent=on?'en línea':'desconectado';
+  }catch(e){}
+}
+
+function reloj(){
+  const n=new Date();
+  $('clock-time').textContent=n.toLocaleTimeString('es-EC',{hour:'2-digit',minute:'2-digit',hour12:false});
+  $('clock-date').textContent=n.toLocaleDateString('es-EC',{weekday:'long',day:'numeric',month:'long',year:'numeric'});
+}
+
+// SSE en vivo
+let _sse=null;
+function initSSE(){
+  if(!window.EventSource) return;
+  try{
+    if(_sse) _sse.close();
+    _sse=new EventSource('/api/eventos');
+    _sse.addEventListener('update',()=>{ cargarDatos(); actualizarMapa(); });
+    _sse.addEventListener('ubicacion',()=>{ actualizarMapa(); });
+    _sse.onerror=()=>setTimeout(()=>initSSE(),4000);
+  }catch(e){}
+}
+
+reloj(); setInterval(reloj,1000);
+initMap(); cargarDatos(); estadoBot();
+setInterval(()=>{ cargarDatos(); actualizarMapa(); estadoBot(); },15000);
+initSSE();
+</script>
+</body>
+</html>

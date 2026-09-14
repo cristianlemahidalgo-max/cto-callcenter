@@ -1,0 +1,15 @@
+services:
+  - type: web
+    name: cto-callcenter-119
+    env: python
+    buildCommand: pip install -r requirements.txt
+    startCommand: gunicorn --bind 0.0.0.0:$PORT --workers 2 --threads 4 --timeout 120 wsgi:app
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.11.0
+      - key: CTO_BACKUP_HORAS
+        value: "6"
+    disk:
+      name: cto-data
+      mountPath: /opt/render/project/src/data
+      sizeGB: 1

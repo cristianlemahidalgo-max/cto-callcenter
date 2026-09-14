@@ -1,0 +1,570 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="theme-color" content="#eef1f5">
+<link rel="manifest" href="/conductor_manifest.json">
+<link rel="icon" type="image/png" href="/conductor_icon.png">
+<link rel="apple-touch-icon" href="/conductor_icon.png">
+<title>CTO 119 — Conductor</title>
+<link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@600;700&family=Nunito:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#eef1f5; --card:#ffffff; --line:#dbe4ee; --line2:#e9edf2;
+  --text:#141a21; --text2:#2b3440; --text3:#5b6675;
+  --green:#0e8a72; --green-dim:#def0ea; --green-line:#bfe8dc;
+  --gold:#d97706; --gold-line:#e8c38a; --gold-dim:#fdf3e2;
+  --blue:#1d5c9e; --red:#e5533d; --red-dim:#fdecec;
+  --shadow:0 4px 18px rgba(20,35,55,.12);
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+body{font-family:'Nunito',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;max-width:480px;margin:0 auto}
+.topbar{background:var(--card);padding:14px 16px;display:flex;align-items:center;gap:12px;border-bottom:1px solid var(--line);position:sticky;top:0;z-index:100}
+.unit-badge{width:40px;height:40px;background:var(--gold);border-radius:10px;display:flex;align-items:center;justify-content:center;font-family:'Rajdhani',sans-serif;font-size:20px;font-weight:700;color:#fff;flex-shrink:0}
+.pill{margin-left:auto;padding:4px 12px;border-radius:20px;font-size:11px;font-weight:600}
+.pill-qap{background:var(--green-dim);color:var(--green)}
+.pill-off{background:var(--line2);color:var(--text3)}
+.section{margin:12px;background:var(--card);border:1px solid var(--line);border-radius:12px;overflow:hidden;box-shadow:var(--shadow)}
+.sec-title{padding:10px 14px;font-size:10px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--text3);border-bottom:1px solid var(--line2)}
+.empty{padding:28px 20px;text-align:center;color:var(--text3);font-size:13px}
+.trip-box{background:#f0faf7;border:1px solid var(--green-line);border-radius:8px;padding:12px;margin-bottom:10px}
+.trip-box .lbl{font-size:10px;color:var(--green);font-weight:700;letter-spacing:1px;text-transform:uppercase;margin-bottom:4px}
+.trip-box .addr{font-size:16px;font-weight:600;line-height:1.3}
+.trip-box .ref{font-size:12px;color:var(--text3);margin-top:3px}
+.info-row{display:flex;align-items:center;gap:8px;padding:8px 0;border-bottom:1px solid var(--line2);font-size:12px}
+.info-row .k{color:var(--text3);width:60px}
+.info-row .v{font-weight:600}
+.info-row a{color:var(--gold);text-decoration:none;margin-left:auto;padding:4px 10px;border:1px solid var(--gold-line);border-radius:6px}
+.btn-row{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px}
+.btn{border:none;border-radius:10px;padding:14px;font-size:14px;font-weight:700;cursor:pointer;font-family:'Nunito',sans-serif;transition:opacity .15s;width:100%}
+.btn:active{opacity:.8}
+.btn-green{background:var(--green);color:#fff}
+.btn-gold{background:var(--gold);color:#fff}
+.btn-gray{background:var(--line2);color:var(--text2);border:1px solid var(--line)}
+.btn-red{background:var(--red);color:#fff}
+.stat-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:var(--line)}
+.stat-item{background:var(--card);padding:14px 10px;text-align:center}
+.stat-val{font-family:'Rajdhani',sans-serif;font-size:28px;font-weight:700;line-height:1}
+.stat-lbl{font-size:10px;color:var(--text3);margin-top:2px}
+.hist-row{display:flex;align-items:center;gap:10px;padding:8px 14px;border-bottom:1px solid var(--line2);font-size:12px}
+.hist-row:last-child{border-bottom:none}
+.hist-hora{font-family:'Rajdhani',sans-serif;font-size:11px;color:var(--text3);min-width:42px}
+.hist-addr{flex:1;color:var(--text2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.badge-ok{background:var(--green-dim);color:var(--green);font-size:10px;padding:2px 7px;border-radius:8px}
+.badge-no{background:var(--line2);color:var(--text3);font-size:10px;padding:2px 7px;border-radius:8px}
+.login-wrap{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:20px}
+.login-card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:32px 24px;width:100%;max-width:360px;box-shadow:var(--shadow)}
+.login-logo{text-align:center;margin-bottom:24px}
+.login-logo .coop{font-size:10px;color:var(--gold);letter-spacing:2px;text-transform:uppercase}
+.login-logo .title{font-family:'Rajdhani',sans-serif;font-size:28px;font-weight:700}
+.login-logo .sub{font-size:11px;color:var(--text3);margin-top:2px}
+.field{margin-bottom:14px}
+.field label{display:block;font-size:10px;font-weight:700;letter-spacing:.5px;color:var(--text2);text-transform:uppercase;margin-bottom:5px}
+.field input{width:100%;background:var(--bg);border:1px solid var(--line);border-radius:8px;padding:12px 14px;color:var(--text);font-family:'Nunito',sans-serif;font-size:16px;outline:none}
+.field input:focus{border-color:var(--blue)}
+.err{background:var(--red-dim);color:var(--red);border:1px solid #f3b0a4;border-radius:6px;padding:8px 12px;font-size:12px;margin-bottom:12px;display:none}
+.toast-c{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);z-index:999;pointer-events:none;width:90%}
+.toast{background:var(--card);border:1px solid var(--line);border-radius:8px;padding:10px 16px;font-size:13px;box-shadow:0 4px 20px rgba(20,35,55,.18);animation:tIn .3s;text-align:center}
+.tok{border-left:3px solid var(--green)}
+.terr{border-left:3px solid var(--red)}
+@keyframes tIn{from{transform:translateY(20px);opacity:0}to{transform:translateY(0);opacity:1}}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.35}}
+.newtrip-pop{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(238,241,245,.92);z-index:998;display:flex;align-items:center;justify-content:center;padding:24px;animation:tIn .25s}
+.newtrip-card{background:var(--card);border:2px solid var(--gold);border-radius:16px;padding:28px 22px;text-align:center;max-width:400px;width:100%;box-shadow:0 8px 30px rgba(20,35,55,.2)}
+.newtrip-card .big{font-size:44px}
+.newtrip-card .t{font-family:'Rajdhani',sans-serif;font-size:22px;font-weight:700;margin:10px 0 4px}
+.newtrip-card .addr{font-size:15px;font-weight:600;color:var(--gold);margin-bottom:14px}
+.newtrip-card .btn{font-size:16px;padding:16px}
+.newtrip-card .close-link{margin-top:12px;font-size:12px;color:var(--text3);text-decoration:underline;cursor:pointer}
+</style>
+</head>
+<body>
+
+<div id="login-view" class="login-wrap">
+  <div class="login-card">
+    <div class="login-logo">
+      <div class="coop">Cooperativa Occidental 119</div>
+      <div class="title">CTO App</div>
+      <div class="sub">Portal del Conductor</div>
+    </div>
+    <div class="err" id="login-err"></div>
+
+    <!-- TABS: Socio/Concesionario o Colaborador -->
+    <div style="display:flex;border-radius:8px;overflow:hidden;border:1px solid var(--line);margin-bottom:16px">
+      <button id="tab-socio" onclick="setLoginTab('socio')" style="flex:1;padding:10px;font-size:12px;font-weight:700;background:var(--line2);color:var(--gold);border:none;cursor:pointer;font-family:'Nunito',sans-serif">
+        🚖 Socio / Titular
+      </button>
+      <button id="tab-colab" onclick="setLoginTab('colab')" style="flex:1;padding:10px;font-size:12px;font-weight:700;background:var(--card);color:var(--text3);border:none;cursor:pointer;font-family:'Nunito',sans-serif">
+        👷 Colaborador
+      </button>
+    </div>
+
+    <!-- Login Socio -->
+    <div id="form-socio">
+      <div class="field">
+        <label>Número de Unidad (1-100 o 200+ concesionario)</label>
+        <input type="number" id="inp-u" placeholder="49" min="1" max="999" inputmode="numeric" onkeydown="if(event.key==='Enter')document.getElementById('inp-t').focus()">
+      </div>
+      <div class="field">
+        <label>Últimos 4 dígitos de su teléfono</label>
+        <input type="number" id="inp-t" placeholder="3523" inputmode="numeric" onkeydown="if(event.key==='Enter')loginConductor()">
+      </div>
+      <button class="btn btn-gold" onclick="loginConductor()">Ingresar al sistema</button>
+      <div style="text-align:center;margin-top:10px;font-size:11px;color:var(--text3)">Ej: Unidad 49 · teléfono termina en 3523</div>
+    </div>
+
+    <!-- Login Colaborador -->
+    <div id="form-colab" style="display:none">
+      <div style="background:var(--green-dim);border:1px solid var(--green-line);border-radius:8px;padding:12px;margin-bottom:14px;font-size:12px;color:var(--green);line-height:1.6">
+        👷 Ingresa tu <strong>código de colaborador</strong> asignado por la cooperativa.<br>
+        <span style="color:var(--text3)">Ejemplo: unidad 49 → código <code style="background:var(--line2);padding:2px 6px;border-radius:4px;letter-spacing:2px">491</code></span>
+      </div>
+      <div class="field">
+        <label>Tu Código de Colaborador</label>
+        <input type="text" id="inp-codigo" placeholder="491"
+          style="text-transform:uppercase;letter-spacing:3px;font-size:18px;font-weight:700;text-align:center"
+          onkeydown="if(event.key==='Enter')loginColaborador()"
+          oninput="this.value=this.value.replace(/[^0-9]/g,'')">
+      </div>
+      <button class="btn btn-green" onclick="loginColaborador()">Ingresar como Colaborador</button>
+      <div style="text-align:center;margin-top:10px;font-size:11px;color:var(--text3)">Tu código fue asignado por la cooperativa CTO 119</div>
+    </div>
+  </div>
+</div>
+
+<div id="app-view" style="display:none">
+  <div class="topbar">
+    <div class="unit-badge" id="tb-u">—</div>
+    <div><div style="font-size:14px;font-weight:600" id="tb-n">—</div><div style="font-size:11px;color:var(--text3)" id="tb-p">—</div></div>
+    <div style="margin-left:auto;display:flex;align-items:center;gap:8px">
+      <div id="tb-gps" title="GPS activo" style="font-size:13px;opacity:.35">📍</div>
+      <button id="btn-install" onclick="instalarApp()" style="display:none;border:1px solid var(--gold-line);background:transparent;color:var(--gold);border-radius:8px;padding:5px 10px;font-size:11px;font-weight:700;cursor:pointer;font-family:'Nunito',sans-serif">📲 Instalar</button>
+      <div class="pill pill-off" id="tb-st">Offline</div>
+    </div>
+  </div>
+  <div class="section">
+    <div id="trip-alert" style="display:none;background:var(--gold);color:#fff;padding:10px 14px;font-weight:800;font-size:14px;text-align:center;animation:blink 1s infinite"></div>
+    <div class="sec-title">Viaje asignado</div>
+    <div id="trip-wrap" style="padding:14px"><div class="empty">Sin viaje asignado ahora</div></div>
+  </div>
+  <div class="section">
+    <div class="sec-title">Mi estado en la central</div>
+    <div style="padding:12px;display:flex;flex-direction:column;gap:8px">
+      <button class="btn btn-green" id="btn-q" onclick="doQAP()">Reportar QAP — Estoy disponible</button>
+      <button class="btn btn-gray"  id="btn-s" onclick="doSalida()" style="display:none">Terminar Turno</button>
+    </div>
+  </div>
+  <div class="section">
+    <div class="sec-title">Mi día de hoy</div>
+    <div class="stat-grid">
+      <div class="stat-item"><div class="stat-val" id="s-v" style="color:var(--green)">0</div><div class="stat-lbl">Viajes</div></div>
+      <div class="stat-item"><div class="stat-val" id="s-t" style="color:var(--gold)">0h</div><div class="stat-lbl">Tiempo QAP</div></div>
+      <div class="stat-item"><div class="stat-val" id="s-r" style="color:var(--text3)">—</div><div class="stat-lbl">Ranking</div></div>
+    </div>
+  </div>
+  <div class="section" style="margin-bottom:20px">
+    <div class="sec-title">Historial de hoy</div>
+    <div id="hist-wrap"><div class="empty">Sin registros hoy</div></div>
+  </div>
+</div>
+
+<div class="toast-c" id="tc"></div>
+<div id="newtrip-overlay" class="newtrip-pop" style="display:none"></div>
+
+<script>
+let cond = null;
+let ultimoViajeId = null;
+let viajeNotificado = null;
+let _audioCtx = null;
+let _deferredPrompt = null;
+
+// ── SONIDO DE ALERTA (Web Audio, sin archivos externos) ────────────────────
+function sonidoViaje(){
+  try{
+    if(!_audioCtx) _audioCtx = new (window.AudioContext||window.webkitAudioContext)();
+    if(_audioCtx.state==='suspended') _audioCtx.resume();
+    const notas=[880,1174.66,1567.98]; // La - Re# - Sol (alerta de taxi)
+    notas.forEach((f,i)=>{
+      const t=_audioCtx.currentTime+i*0.16;
+      const o=_audioCtx.createOscillator();
+      const g=_audioCtx.createGain();
+      o.type='square'; o.frequency.value=f;
+      g.gain.setValueAtTime(0.0001,t);
+      g.gain.exponentialRampToValueAtTime(0.28,t+0.02);
+      g.gain.exponentialRampToValueAtTime(0.0001,t+0.16);
+      o.connect(g); g.connect(_audioCtx.destination);
+      o.start(t); o.stop(t+0.18);
+    });
+  }catch(e){}
+}
+
+function vibrar(){
+  try{ if(navigator.vibrate) navigator.vibrate([300,150,300]); }catch(e){}
+}
+
+// ── INSTALAR COMO APP (PWA sin Play Store) ─────────────────────────────────
+function instalarApp(){
+  if(_deferredPrompt){ _deferredPrompt.prompt(); }
+  else { toast('Abre el menú ⋮ de tu navegador → "Instalar aplicación"', false); }
+}
+
+window.addEventListener('beforeinstallprompt', (e)=>{
+  e.preventDefault();
+  _deferredPrompt = e;
+  const b=document.getElementById('btn-install');
+  if(b) b.style.display='block';
+});
+
+// ── REGISTRO DEL SERVICE WORKER (permite instalar la app) ─────────────────
+if('serviceWorker' in navigator){
+  navigator.serviceWorker.register('/conductor_sw.js').catch(()=>{});
+}
+
+// ── RESTAURAR SESIÓN AL RECARGAR ──────────────────────────────────────
+window.addEventListener('load', async ()=>{
+  // Check licencia primero
+  try{
+    const lr = await fetch('/api/license/status');
+    const ld = await lr.json();
+    if(!ld.valid){
+      document.getElementById('login-view').innerHTML = `
+        <div style="display:flex;align-items:center;justify-content:center;min-height:100vh;
+          background:linear-gradient(135deg,#0a1628 0%,#12233f 50%,#0b1d36 100%);font-family:sans-serif">
+          <div style="text-align:center;max-width:400px;padding:30px">
+            <div style="font-size:56px;margin-bottom:16px">🔒</div>
+            <h1 style="color:#f8d7da;font-size:22px;margin-bottom:8px">Sistema Bloqueado</h1>
+            <p style="color:#e8a8ae;font-size:14px">Licencia vencida. Contacte al administrador.</p>
+          </div>
+        </div>`;
+      return;
+    }
+  }catch(e){}
+  try {
+    const r = await fetch('/api/conductor/sesion');
+    const d = await r.json();
+    if(d.ok && d.conductor){
+      cond = d.conductor;
+      try{
+        const cr = await fetch('/api/conductores/unidad/'+cond.unidad);
+        const lista = await cr.json();
+        if(Array.isArray(lista) && lista.length){
+          const full = lista.find(c=>c.id===cond.id || c.nombre===cond.nombre) || lista[0];
+          Object.assign(cond, full);
+        }
+      }catch(e){}
+      document.getElementById('login-view').style.display='none';
+      document.getElementById('app-view').style.display='block';
+      renderHeader();
+      await refrescar();
+      setInterval(refrescar, 15000);
+      iniciarGPS();
+      initSSE();
+    }
+  } catch(e) {}
+});
+
+// ── GPS REAL ───────────────────────────────────────────────────────────────
+function iniciarGPS(){
+  if(!navigator.geolocation){ toast('Tu teléfono no tiene GPS', false); return; }
+  const gpsEl=document.getElementById('tb-gps');
+  const enviar=()=>{
+    navigator.geolocation.getCurrentPosition((pos)=>{
+      if(!cond) return;
+      fetch('/api/conductor/ubicacion',{
+        method:'POST', headers:{'Content-Type':'application/json'},
+        body:JSON.stringify({unidad:cond.unidad, lat:pos.coords.latitude, lng:pos.coords.longitude})
+      }).then(r=>r.json()).then(d=>{
+        if(d.ok && gpsEl){ gpsEl.style.opacity='1'; gpsEl.style.filter='drop-shadow(0 0 6px var(--green))'; }
+      }).catch(()=>{});
+    }, ()=>{
+      if(gpsEl) gpsEl.style.opacity='.35';
+    }, {enableHighAccuracy:true, timeout:8000, maximumAge:15000});
+  };
+  enviar();
+  setInterval(enviar, 30000);
+}
+
+// ── RECEPCIÓN EN TIEMPO REAL (SSE) ─────────────────────────────────────────
+// Se conecta al mismo canal de eventos del panel. Cuando la operadora
+// asigna un viaje, llega al instante y suena la alerta.
+let _sse = null;
+function initSSE(){
+  if(!window.EventSource) return;
+  try{
+    if(_sse) _sse.close();
+    _sse = new EventSource('/api/eventos');
+    _sse.addEventListener('update', async (ev)=>{
+      try{
+        const d=JSON.parse(ev.data);
+        if(d.key==='viajes' || d.key==='unidades_actividad'){
+          await refrescar(true);
+        }
+      }catch(e){}
+    });
+    _sse.onerror=()=>{ setTimeout(()=>{ if(cond) initSSE(); }, 4000); };
+  }catch(e){}
+}
+
+function mostrarNuevoViaje(v){
+  if(viajeNotificado===v.id) return;
+  viajeNotificado=v.id;
+  sonidoViaje(); vibrar();
+  const ov=document.getElementById('newtrip-overlay');
+  ov.innerHTML=`
+    <div class="newtrip-card">
+      <div class="big">🚕</div>
+      <div class="t">¡NUEVO VIAJE!</div>
+      <div style="font-size:12px;color:var(--text3)">Unidad ${v.numero_unidad} · ${v.cliente_nombre||'Cliente'}</div>
+      <div class="addr">📍 ${v.direccion_recogida||'—'}</div>
+      ${v.destino?'<div style="font-size:13px;color:var(--text2);margin-bottom:12px">🏁 '+v.destino+'</div>':''}
+      <button class="btn btn-gold" onclick="aceptarViaje()">Aceptar viaje</button>
+      <div class="close-link" onclick="cerrarNuevoViaje()">Ya lo vi (seguir en pantalla)</div>
+    </div>`;
+  ov.style.display='flex';
+  // También marca el banner superior
+  const al=document.getElementById('trip-alert');
+  al.textContent='🚕 ¡NUEVO VIAJE! — Acéptalo en la pantalla o arriba ⬆';
+  al.style.display='block';
+}
+
+function aceptarViaje(){
+  document.getElementById('newtrip-overlay').style.display='none';
+  const al=document.getElementById('trip-alert');
+  al.style.display='none';
+  toast('Viaje aceptado ✅');
+}
+
+function cerrarNuevoViaje(){
+  document.getElementById('newtrip-overlay').style.display='none';
+  const al=document.getElementById('trip-alert');
+  al.style.display='none';
+}
+
+function toast(msg, ok=true){
+  const t=document.createElement('div');
+  t.className='toast '+(ok?'tok':'terr');
+  t.textContent=msg;
+  document.getElementById('tc').appendChild(t);
+  setTimeout(()=>t.remove(),3500);
+}
+
+async function loginConductor(){
+  const u=parseInt(document.getElementById('inp-u').value);
+  const t=document.getElementById('inp-t').value.trim();
+  const err=document.getElementById('login-err');
+  if(!u||u<1){err.textContent='Número de unidad inválido';err.style.display='block';return;}
+  if(!t||t.length<4){err.textContent='Ingrese los últimos 4 dígitos de su teléfono';err.style.display='block';return;}
+  try{
+    const r=await fetch('/api/conductor/login',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({unidad:u,tel_sufijo:t})});
+    const d=await r.json();
+    if(d.ok){
+      cond=d.conductor; err.style.display='none';
+      document.getElementById('login-view').style.display='none';
+      document.getElementById('app-view').style.display='block';
+      renderHeader(); await refrescar();
+      setInterval(refrescar,15000);
+      iniciarGPS();
+      initSSE();
+    } else {
+      err.textContent=d.error||'No encontrado. Verifique unidad y teléfono';
+      err.style.display='block';
+    }
+  } catch(e){err.textContent='Sin conexión con el servidor central';err.style.display='block';}
+}
+
+async function loginColaborador(){
+  const codigo=document.getElementById('inp-codigo').value.trim();
+  const err=document.getElementById('login-err');
+  if(!codigo || codigo.length < 2){err.textContent='Ingrese su código (ej: 491)';err.style.display='block';return;}
+  try{
+    const r=await fetch('/api/conductor/login',{method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({unidad:0,codigo_colaborador:codigo})});
+    const d=await r.json();
+    if(d.ok){
+      cond=d.conductor; err.style.display='none';
+      document.getElementById('login-view').style.display='none';
+      document.getElementById('app-view').style.display='block';
+      renderHeader(); await refrescar();
+      setInterval(refrescar,15000);
+      iniciarGPS();
+      initSSE();
+    } else {
+      err.textContent=d.error||'Código no válido. Ejemplo: 491';
+      err.style.display='block';
+    }
+  } catch(e){err.textContent='Sin conexión con el servidor central';err.style.display='block';}
+}
+
+function setLoginTab(tab){
+  const isSocio = tab==='socio';
+  document.getElementById('form-socio').style.display = isSocio ? 'block' : 'none';
+  document.getElementById('form-colab').style.display = isSocio ? 'none' : 'block';
+  document.getElementById('tab-socio').style.background = isSocio ? 'var(--line2)' : 'var(--card)';
+  document.getElementById('tab-socio').style.color = isSocio ? 'var(--gold)' : 'var(--text3)';
+  document.getElementById('tab-colab').style.background = isSocio ? 'var(--card)' : 'var(--line2)';
+  document.getElementById('tab-colab').style.color = isSocio ? 'var(--text3)' : 'var(--green)';
+}
+
+function renderHeader(){
+  if(!cond) return;
+  document.getElementById('tb-u').textContent=cond.unidad;
+  document.getElementById('tb-n').textContent=cond.nombre.split(' ').slice(0,2).join(' ')
+    + (cond.tipo==='colaborador' ? ' 👷' : '');
+  document.getElementById('tb-p').textContent=cond.placa+' · '+cond.marca
+    + (cond.tipo==='colaborador' ? ' · Colaborador ['+cond.codigo+']' : '');
+}
+
+async function refrescar(notificar=false){
+  if(!cond) return;
+  try{
+    const r=await fetch('/api/conductor/estado/'+cond.unidad);
+    const d=await r.json();
+    // Detectar viaje nuevo asignado → alerta sonora + pantalla
+    const vId = d.viaje_activo ? d.viaje_activo.id : null;
+    if(notificar && vId && vId !== ultimoViajeId){
+      mostrarNuevoViaje(d.viaje_activo);
+    }
+    if(!vId){
+      ultimoViajeId = null;
+      viajeNotificado = null;
+      const ov=document.getElementById('newtrip-overlay');
+      if(ov && ov.style.display==='flex') ov.style.display='none';
+      const al=document.getElementById('trip-alert');
+      if(al) al.style.display='none';
+    } else {
+      ultimoViajeId = vId;
+    }
+    // QAP status
+    const st=document.getElementById('tb-st');
+    const bq=document.getElementById('btn-q');
+    const bs=document.getElementById('btn-s');
+    if(d.qap_activo){
+      st.textContent='QAP ✓'; st.className='pill pill-qap';
+      bq.style.display='none'; bs.style.display='block';
+    } else {
+      st.textContent='Offline'; st.className='pill pill-off';
+      bq.style.display='block'; bs.style.display='none';
+    }
+    // Viaje
+    const tw=document.getElementById('trip-wrap');
+    if(d.viaje_activo){
+      const v=d.viaje_activo;
+      const tel=v.cliente_tel||'';
+      const enCurso = v.estado==='en_curso';
+      const enDestino = v.estado==='en_destino';
+      tw.innerHTML=`
+        <div class="trip-box">
+          <div class="lbl">Recoger en</div>
+          <div class="addr">${v.direccion_recogida||'—'}</div>
+          ${v.referencia_recogida?'<div class="ref">'+v.referencia_recogida+'</div>':''}
+        </div>
+        ${v.destino?'<div class="trip-box" style="background:#eaf1fb;border-color:#c4d8f0"><div class="lbl" style="color:var(--blue)">Destino</div><div class="addr">'+v.destino+'</div></div>':''}
+        <div class="info-row"><span class="k">Cliente</span><span class="v">${v.cliente_nombre||'—'}</span></div>
+        <div class="info-row" style="border-bottom:none"><span class="k">Teléfono</span><span class="v">${tel}</span>${tel?'<a href="tel:'+tel+'">Llamar</a>':''}</div>
+        ${v.observaciones?'<div style="background:var(--line2);border-radius:6px;padding:8px 10px;font-size:12px;color:var(--text2);margin-top:8px">'+v.observaciones+'</div>':''}
+        <div class="btn-row">
+          ${!enCurso && !enDestino ? `<button class="btn btn-blue" onclick="iniciarViaje(${v.id})">Iniciar Viaje</button>` : ''}
+          ${enCurso ? `<button class="btn btn-green" onclick="llegoDestino(${v.id})">Llegué al Destino</button>` : ''}
+          ${enDestino ? `<button class="btn btn-green" onclick="completarViaje(${v.id})">Entregado</button>` : ''}
+          <button class="btn btn-red" onclick="enviarSOS()">🚨 SOS</button>
+        </div>
+      `;
+    } else {
+      tw.innerHTML='<div class="empty">Sin viaje asignado ahora mismo</div>';
+    }
+    // Stats
+    document.getElementById('s-v').textContent=d.viajes_hoy||0;
+    const min=d.minutos_qap||0;
+    document.getElementById('s-t').textContent=min>=60?Math.floor(min/60)+'h '+(min%60)+'m':min+'m';
+    document.getElementById('s-r').textContent=d.posicion_ranking?'#'+d.posicion_ranking:'—';
+    // Historial
+    const hw=document.getElementById('hist-wrap');
+    if(d.historial&&d.historial.length){
+      hw.innerHTML=d.historial.slice(0,15).map(h=>`
+        <div class="hist-row">
+          <span class="hist-hora">${(h.fecha_asignacion||'').slice(11,16)}</span>
+          <span class="hist-addr">${h.direccion_recogida||'—'}</span>
+          <span class="${h.estado==='completado'?'badge-ok':'badge-no'}">${h.estado==='completado'?'OK':'—'}</span>
+        </div>`).join('');
+    } else {
+      hw.innerHTML='<div class="empty">Sin viajes registrados hoy</div>';
+    }
+  } catch(e){ console.error(e); }
+}
+
+async function doQAP(){
+  try{
+    const r=await fetch('/api/conductor/qap',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({unidad:cond.unidad})});
+    const d=await r.json();
+    if(d.ok){toast('QAP registrado — estás disponible');await refrescar();}
+    else toast(d.error||'Error al reportar',false);
+  }catch(e){toast('Sin conexión',false);}
+}
+
+async function doSalida(){
+  if(!confirm('¿Terminar turno del día?')) return;
+  try{
+    const r=await fetch('/api/conductor/salida',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({unidad:cond.unidad})});
+    const d=await r.json();
+    if(d.ok){
+      // Si es colaborador, registrar fin de turno con su código
+      if(cond.tipo==='colaborador' && cond.codigo){
+        await fetch('/api/colaboradores/turno',{method:'POST',headers:{'Content-Type':'application/json'},
+          body:JSON.stringify({codigo:cond.codigo,accion:'fin'})}).catch(()=>{});
+      }
+      toast('Turno terminado. ¡Hasta mañana!');
+      await refrescar();
+    } else toast(d.error||'Error',false);
+  }catch(e){toast('Sin conexión',false);}
+}
+
+async function completarViaje(id){
+  if(!confirm('¿Confirmar entrega del viaje?')) return;
+  try{
+    const r=await fetch('/api/conductor/completar-viaje',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({id_viaje:id,unidad:cond.unidad})});
+    const d=await r.json();
+    if(d.ok){toast('Viaje completado');await refrescar();}
+    else toast(d.error||'Error',false);
+  }catch(e){toast('Sin conexión',false);}
+}
+
+async function iniciarViaje(id){
+  try{
+    const r=await fetch('/api/conductor/iniciar-viaje',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({id_viaje:id})});
+    const d=await r.json();
+    if(d.ok){toast('Viaje iniciado — en camino al cliente');await refrescar();}
+    else toast(d.error||'Error',false);
+  }catch(e){toast('Sin conexión',false);}
+}
+
+async function llegoDestino(id){
+  try{
+    const r=await fetch('/api/conductor/llego-destino',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({id_viaje:id})});
+    const d=await r.json();
+    if(d.ok){toast('En destino — confirme entrega');await refrescar();}
+    else toast(d.error||'Error',false);
+  }catch(e){toast('Sin conexión',false);}
+}
+
+async function enviarSOS(){
+  if(!confirm('🚨 Enviar alerta SOS a la central?\nEsto notificará inmediatamente a todas las operadoras.')) return;
+  try{
+    let lat=null, lng=null;
+    try{
+      const pos=await new Promise((res,rej)=>navigator.geolocation.getCurrentPosition(res,rej,{timeout:5000,enableHighAccuracy:true}));
+      lat=pos.coords.latitude; lng=pos.coords.longitude;
+    }catch(e){}
+    const r=await fetch('/api/conductor/sos',{method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({unidad:cond.unidad,lat,lng})});
+    const d=await r.json();
+    if(d.ok) toast('🚨 SOS enviado — la central está alertada');
+    else toast(d.error||'Error al enviar SOS',false);
+  }catch(e){toast('Sin conexión',false);}
+}
+</script>
+</body>
+</html>

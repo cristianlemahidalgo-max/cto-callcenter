@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512">
+  <rect width="512" height="512" rx="96" fill="#0a0d14"/>
+  <rect x="56" y="56" width="400" height="400" rx="72" fill="#0f1320" stroke="#232a45" stroke-width="8"/>
+  <text x="256" y="180" text-anchor="middle" font-size="120">🚕</text>
+  <text x="256" y="330" text-anchor="middle" font-family="Arial, sans-serif" font-weight="700" font-size="150" fill="#f5a623">119</text>
+  <text x="256" y="416" text-anchor="middle" font-family="Arial, sans-serif" font-weight="600" font-size="34" fill="#5a6180" letter-spacing="4">CTO CONDUCTOR</text>
+</svg>

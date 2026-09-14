@@ -1,0 +1,314 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>CTO 119 — Panel de Unidades</title>
+<link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@600;700&family=JetBrains+Mono:wght@400&family=Nunito:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Nunito',sans-serif;background:#f0f6ff;color:#111827;min-height:100vh}
+.topbar{background:#ffffff;border-bottom:2px solid #c9d9ef;padding:12px 20px;display:flex;align-items:center;gap:12px;position:sticky;top:0;z-index:100;box-shadow:0 2px 8px rgba(0,90,180,0.10)}
+.logo{font-family:'Rajdhani',sans-serif;font-size:18px;font-weight:700;color:#e6a800}
+.live-dot{width:8px;height:8px;border-radius:50%;background:#1a9e55;animation:blink 1.5s infinite;flex-shrink:0}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.3}}
+.last-update{font-size:11px;color:#6b7280;margin-left:auto}
+.btn-sm{background:#e8f0fb;border:1px solid #b0c8e8;border-radius:6px;padding:5px 12px;color:#111827;font-size:12px;cursor:pointer;font-family:'Nunito',sans-serif;font-weight:600;transition:all .15s}
+.btn-sm:hover{background:#d4e4f7;border-color:#0099cc;color:#0099cc}
+.stats-bar{display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:#c9d9ef;border-bottom:2px solid #c9d9ef}
+.sbar-item{background:#ffffff;padding:12px 16px;display:flex;align-items:center;gap:10px}
+.sbar-val{font-family:'Rajdhani',sans-serif;font-size:26px;font-weight:700;line-height:1}
+.sbar-lbl{font-size:11px;color:#6b7280;font-weight:600}
+.content{padding:16px 20px}
+.legend{display:flex;gap:16px;margin-bottom:14px;font-size:12px}
+.leg-item{display:flex;align-items:center;gap:6px}
+.leg-dot{width:10px;height:10px;border-radius:3px}
+.grid-title{font-size:11px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:#6b7280;margin-bottom:10px}
+.units-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(90px,1fr));gap:8px;margin-bottom:20px}
+.unit-card{border-radius:8px;padding:10px 8px;cursor:pointer;transition:transform .1s,box-shadow .15s;border:1.5px solid transparent;box-shadow:0 1px 4px rgba(0,90,180,0.08)}
+.unit-card:active{transform:scale(.95)}
+.unit-card.qap{background:#f0fbf5;border-color:#1a9e55}
+.unit-card.trip{background:#e6f4ff;border-color:#0099cc}
+.unit-card.overdue{background:#fff0f0;border-color:#d92d2d;animation:pulse 2s infinite}
+.unit-card.offline{background:#f3f4f6;border-color:#d1d5db}
+@keyframes pulse{0%,100%{border-color:#d92d2d}50%{border-color:#ff6666;box-shadow:0 0 10px rgba(217,45,45,0.3)}}
+.unit-num{font-family:'Rajdhani',sans-serif;font-size:22px;font-weight:700;line-height:1}
+.unit-card.qap .unit-num{color:#1a9e55}
+.unit-card.trip .unit-num{color:#0077aa}
+.unit-card.overdue .unit-num{color:#d92d2d}
+.unit-card.offline .unit-num{color:#9ca3af}
+.unit-name{font-size:10px;margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:#374151}
+.unit-card.offline .unit-name{color:#9ca3af}
+.unit-meta{font-family:'JetBrains Mono',monospace;font-size:9px;margin-top:3px}
+.unit-card.qap .unit-meta{color:#1a9e55}
+.unit-card.trip .unit-meta{color:#0099cc}
+.unit-card.overdue .unit-meta{color:#d92d2d}
+.unit-card.offline .unit-meta{color:#9ca3af}
+.detail-panel{background:#ffffff;border:1px solid #c9d9ef;border-radius:10px;padding:16px;margin-bottom:16px;display:none;box-shadow:0 2px 12px rgba(0,90,180,0.10)}
+.detail-panel.show{display:block}
+.detail-header{display:flex;align-items:center;gap:12px;margin-bottom:14px}
+.detail-ubadge{width:48px;height:48px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-family:'Rajdhani',sans-serif;font-size:24px;font-weight:700}
+.event-list{max-height:200px;overflow-y:auto}
+.event-row{display:flex;gap:10px;padding:6px 0;border-bottom:1px solid #e8f0fb;font-size:12px;align-items:center}
+.event-row:last-child{border-bottom:none}
+.event-time{font-family:'JetBrains Mono',monospace;font-size:10px;color:#6b7280;min-width:50px}
+.event-tag{font-size:10px;padding:2px 7px;border-radius:6px;min-width:50px;text-align:center;font-weight:700}
+.tag-qap{background:#d4f5e4;color:#1a9e55}
+.tag-sal{background:#f3f4f6;color:#6b7280}
+.tag-via{background:#e6f4ff;color:#0099cc}
+.section-2col{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+@media(max-width:600px){.section-2col{grid-template-columns:1fr}.stats-bar{grid-template-columns:repeat(2,1fr)}}
+.panel-sm{background:#ffffff;border:1px solid #c9d9ef;border-radius:10px;overflow:hidden;box-shadow:0 1px 6px rgba(0,90,180,0.07)}
+.panel-sm .ph{padding:10px 14px;font-size:11px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:#6b7280;border-bottom:1px solid #e8f0fb;background:#f8faff}
+.event-row-main{display:flex;gap:8px;padding:8px 14px;border-bottom:1px solid #e8f0fb;font-size:12px;align-items:center}
+.event-row-main:last-child{border-bottom:none}
+.eu{font-family:'Rajdhani',sans-serif;font-size:16px;font-weight:700;color:#e6a800;min-width:28px}
+.ea{color:#374151;flex:1}
+.et{font-size:10px;color:#6b7280;font-family:'JetBrains Mono',monospace}
+</style>
+
+</head>
+<body>
+
+<div class="topbar">
+  <div class="logo">CTO 119</div>
+  <span style="font-size:12px;color:#5a6180">Panel de Unidades</span>
+  <div class="live-dot"></div>
+  <span class="last-update" id="last-upd">Cargando...</span>
+  <button class="btn-sm" onclick="cargar()">↻ Actualizar</button>
+  <button class="btn-sm" onclick="window.location='/'">← Central</button>
+</div>
+
+<div class="stats-bar">
+  <div class="sbar-item"><div class="sbar-val" id="sb-qap" style="color:#2ec97e">0</div><div class="sbar-lbl">En QAP</div></div>
+  <div class="sbar-item"><div class="sbar-val" id="sb-trip" style="color:#60a5fa">0</div><div class="sbar-lbl">En viaje</div></div>
+  <div class="sbar-item"><div class="sbar-val" id="sb-over" style="color:#e84545">0</div><div class="sbar-lbl">+30 min esperando</div></div>
+  <div class="sbar-item"><div class="sbar-val" id="sb-viajes" style="color:#f5a623">0</div><div class="sbar-lbl">Viajes hoy</div></div>
+</div>
+
+<div class="content">
+  <div class="legend">
+    <div class="leg-item"><div class="leg-dot" style="background:#f0fbf5;border:1.5px solid #1a9e55"></div><span style="color:#1a9e55;font-weight:600">QAP</span></div>
+    <div class="leg-item"><div class="leg-dot" style="background:#e6f4ff;border:1.5px solid #0099cc"></div><span style="color:#0099cc;font-weight:600">En viaje</span></div>
+    <div class="leg-item"><div class="leg-dot" style="background:#fff0f0;border:1.5px solid #d92d2d"></div><span style="color:#d92d2d;font-weight:600">+30 min</span></div>
+    <div class="leg-item"><div class="leg-dot" style="background:#f3f4f6;border:1.5px solid #d1d5db"></div><span style="color:#9ca3af;font-weight:600">Offline</span></div>
+  </div>
+
+  <div class="grid-title">Todas las unidades — haz clic para ver detalle</div>
+  <div class="units-grid" id="units-grid">
+    <div style="color:#5a6180;font-size:12px;padding:20px">Cargando unidades...</div>
+  </div>
+
+  <!-- DETALLE de unidad seleccionada -->
+  <div class="detail-panel" id="detail-panel">
+    <div class="detail-header">
+      <div class="detail-ubadge" id="dp-badge">—</div>
+      <div>
+        <div style="font-size:16px;font-weight:600;color:#111827" id="dp-nombre">—</div>
+        <div style="font-size:12px;color:#6b7280" id="dp-placa">—</div>
+      </div>
+      <div style="margin-left:auto;font-size:12px;color:#6b7280" id="dp-stats">—</div>
+      <button onclick="document.getElementById('detail-panel').classList.remove('show')" style="background:none;border:none;color:#9ca3af;font-size:20px;cursor:pointer;line-height:1">✕</button>
+    </div>
+    <div id="dp-viaje" style="margin-bottom:12px"></div>
+    <div style="font-size:10px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:#6b7280;margin-bottom:6px">Actividad reciente</div>
+    <div class="event-list" id="dp-actividad"></div>
+  </div>
+
+  <div class="section-2col">
+    <div class="panel-sm">
+      <div class="ph">Últimos eventos</div>
+      <div id="eventos-list">
+        <div style="padding:20px;text-align:center;color:#5a6180;font-size:12px">Cargando...</div>
+      </div>
+    </div>
+    <div class="panel-sm">
+      <div class="ph">Top unidades hoy</div>
+      <div id="top-list">
+        <div style="padding:20px;text-align:center;color:#5a6180;font-size:12px">Cargando...</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+let conductores = [];
+let actividadData = [];
+let viajesData = [];
+let estadoCache = {};
+
+async function cargar(){
+  try{
+    // Cargar conductores
+    const rc = await fetch('/api/load/conductores');
+    conductores = await rc.json();
+
+    // Cargar actividad de hoy
+    const ra = await fetch('/api/load/unidades_actividad');
+    actividadData = await ra.json();
+
+    // Cargar viajes de hoy
+    const rv = await fetch('/api/reporte/viajes?fecha='+new Date().toISOString().slice(0,10));
+    viajesData = await rv.json();
+
+    calcularEstados();
+    renderGrid();
+    renderEventos();
+    renderTop();
+
+    document.getElementById('last-upd').textContent = 'Actualizado: '+new Date().toLocaleTimeString('es-EC',{hour12:false});
+  } catch(e){
+    console.error('Error cargando:', e);
+    document.getElementById('last-upd').textContent = 'Error de conexión';
+  }
+}
+
+function calcularEstados(){
+  estadoCache = {};
+  const hoy = new Date().toLocaleDateString('es-EC');
+  const ahora = Date.now();
+
+  // Último evento por unidad
+  const byUnit = {};
+  actividadData.forEach(a=>{
+    const u = a.numero_unidad;
+    if(!byUnit[u] || a.fecha_hora > byUnit[u].fecha_hora) byUnit[u] = a;
+  });
+
+  // Viajes hoy por unidad
+  const viajesPorUnidad = {};
+  viajesData.forEach(v=>{
+    const u = v.numero_unidad;
+    if(!viajesPorUnidad[u]) viajesPorUnidad[u]=0;
+    if(v.estado==='asignado'||v.estado==='completado') viajesPorUnidad[u]++;
+  });
+
+  // Viaje activo por unidad
+  const viajeActivo = {};
+  viajesData.forEach(v=>{
+    if(v.estado==='asignado' && v.numero_unidad){
+      const asignT = new Date(v.fecha_asignacion||v.fecha_solicitud).getTime();
+      if(ahora - asignT < 300000) viajeActivo[v.numero_unidad] = v; // 5 min ventana
+    }
+  });
+
+  conductores.forEach(c=>{
+    const ultima = byUnit[c.unidad];
+    const enQAP = ultima && ultima.accion==='qap';
+    const minQAP = enQAP ? Math.round((ahora - new Date(ultima.fecha_hora).getTime())/60000) : 0;
+    const viajes = viajesPorUnidad[c.unidad]||0;
+    const enViaje = !!viajeActivo[c.unidad];
+    let estado = 'offline';
+    if(enViaje) estado = 'trip';
+    else if(enQAP && minQAP > 30) estado = 'overdue';
+    else if(enQAP) estado = 'qap';
+    estadoCache[c.unidad] = {estado, minQAP, viajes, enViaje, viajeActivo:viajeActivo[c.unidad]||null};
+  });
+}
+
+function renderGrid(){
+  const grid = document.getElementById('units-grid');
+  let qapC=0, tripC=0, overC=0, viajesTotal=0;
+
+  grid.innerHTML = conductores.map(c=>{
+    const e = estadoCache[c.unidad]||{estado:'offline',minQAP:0,viajes:0};
+    if(e.estado==='qap') qapC++;
+    else if(e.estado==='trip') tripC++;
+    else if(e.estado==='overdue'){qapC++;overC++;}
+    viajesTotal += e.viajes;
+    const timerStr = e.estado!=='offline' ? (e.minQAP>59?Math.floor(e.minQAP/60)+'h'+(e.minQAP%60)+'m':e.minQAP+'m') : '';
+    return `<div class="unit-card ${e.estado}" onclick="verDetalle(${c.unidad})" title="${c.nombre}">
+      <div class="unit-num">${c.unidad}</div>
+      <div class="unit-name">${c.nombre.split(' ')[0]} ${c.nombre.split(' ')[1]||''}</div>
+      <div class="unit-meta">${e.estado==='offline'?'offline':e.estado==='trip'?'en viaje':timerStr+' · '+e.viajes+'v'}</div>
+    </div>`;
+  }).join('');
+
+  document.getElementById('sb-qap').textContent = qapC-overC;
+  document.getElementById('sb-trip').textContent = tripC;
+  document.getElementById('sb-over').textContent = overC;
+  document.getElementById('sb-viajes').textContent = viajesTotal;
+}
+
+function verDetalle(unidad){
+  const c = conductores.find(x=>x.unidad===unidad);
+  if(!c) return;
+  const e = estadoCache[unidad]||{};
+  const colores = {qap:'#d4f5e4',trip:'#e6f4ff',overdue:'#fde8e8',offline:'#f3f4f6'};
+  const textc  = {qap:'#1a9e55',trip:'#0077aa',overdue:'#d92d2d',offline:'#9ca3af'};
+  const badge = document.getElementById('dp-badge');
+  badge.textContent = unidad;
+  badge.style.background = colores[e.estado]||'#1e1e2a';
+  badge.style.color = textc[e.estado]||'#3a3a4a';
+  document.getElementById('dp-nombre').textContent = c.nombre.split(' ').slice(0,3).join(' ');
+  document.getElementById('dp-placa').textContent  = c.placa+' · '+c.marca+' '+c.modelo;
+  document.getElementById('dp-stats').textContent  = e.viajes+' viajes hoy · '+
+    (e.estado==='offline'?'Offline':e.estado==='trip'?'En viaje':e.minQAP+'min QAP');
+  // Viaje activo
+  const dpViaje = document.getElementById('dp-viaje');
+  if(e.viajeActivo){
+    const v=e.viajeActivo;
+    dpViaje.innerHTML=`<div style="background:#e6f4ff;border:1.5px solid #0099cc;border-radius:8px;padding:10px;font-size:12px">
+      <div style="color:#0099cc;font-size:10px;font-weight:700;margin-bottom:4px">VIAJE ACTIVO</div>
+      <div style="font-weight:600;color:#111827">${v.cliente_nombre}</div>
+      <div style="color:#374151">${v.direccion_recogida}</div>
+    </div>`;
+  } else dpViaje.innerHTML='';
+  // Actividad reciente de esa unidad
+  const actsU = actividadData.filter(a=>a.numero_unidad===unidad)
+    .sort((a,b)=>b.fecha_hora.localeCompare(a.fecha_hora)).slice(0,10);
+  const viajesU = viajesData.filter(v=>v.numero_unidad===unidad)
+    .sort((a,b)=>(b.fecha_asignacion||'').localeCompare(a.fecha_asignacion||'')).slice(0,5);
+  const allEvents = [
+    ...actsU.map(a=>({tipo:a.accion,hora:a.fecha_hora.slice(11,16),txt:a.accion==='qap'?'Reportó QAP':'Salida de turno'})),
+    ...viajesU.map(v=>({tipo:'via',hora:(v.fecha_asignacion||v.fecha_solicitud||'').slice(11,16),txt:'Viaje → '+v.direccion_recogida?.slice(0,30)}))
+  ].sort((a,b)=>b.hora.localeCompare(a.hora)).slice(0,10);
+  document.getElementById('dp-actividad').innerHTML = allEvents.length ?
+    allEvents.map(ev=>`<div class="event-row">
+      <span class="event-time">${ev.hora}</span>
+      <span class="event-tag ${ev.tipo==='qap'?'tag-qap':ev.tipo==='salida'?'tag-sal':'tag-via'}">${ev.tipo==='qap'?'QAP':ev.tipo==='salida'?'SAL':'VIAJE'}</span>
+      <span style="font-size:11px;color:#374151;flex:1">${ev.txt}</span>
+    </div>`).join('') :
+    '<div style="color:#6b7280;font-size:12px;padding:10px">Sin actividad registrada hoy</div>';
+  document.getElementById('detail-panel').classList.add('show');
+  document.getElementById('detail-panel').scrollIntoView({behavior:'smooth',block:'start'});
+}
+
+function renderEventos(){
+  // Últimos 15 eventos de actividad + viajes
+  const hoy = new Date().toLocaleDateString('es-EC');
+  const events = actividadData
+    .sort((a,b)=>b.fecha_hora.localeCompare(a.fecha_hora))
+    .slice(0,15);
+  document.getElementById('eventos-list').innerHTML = events.length ?
+    events.map(a=>{
+      const c = conductores.find(x=>x.unidad===a.numero_unidad);
+      return `<div class="event-row-main">
+        <span class="eu">${a.numero_unidad}</span>
+        <span class="ea">${a.accion==='qap'?'Reportó QAP':'Salida de turno'}</span>
+        <span class="et">${a.fecha_hora.slice(11,16)}</span>
+      </div>`;
+    }).join('') :
+    '<div style="padding:20px;text-align:center;color:#6b7280;font-size:12px">Sin actividad hoy</div>';
+}
+
+function renderTop(){
+  const top = conductores.map(c=>({c,viajes:estadoCache[c.unidad]?.viajes||0}))
+    .filter(x=>x.viajes>0)
+    .sort((a,b)=>b.viajes-a.viajes)
+    .slice(0,8);
+  document.getElementById('top-list').innerHTML = top.length ?
+    top.map((x,i)=>`<div class="event-row-main">
+      <span style="color:#6b7280;font-size:11px;min-width:16px">${i+1}</span>
+      <span class="eu">${x.c.unidad}</span>
+      <span class="ea">${x.c.nombre.split(' ')[0]} ${x.c.nombre.split(' ')[1]||''}</span>
+      <span style="font-family:'JetBrains Mono',monospace;font-size:13px;color:#e6a800;font-weight:700">${x.viajes}</span>
+    </div>`).join('') :
+    '<div style="padding:20px;text-align:center;color:#6b7280;font-size:12px">Sin viajes hoy</div>';
+}
+
+cargar();
+setInterval(cargar, 10000);
+</script>
+</body>
+</html>

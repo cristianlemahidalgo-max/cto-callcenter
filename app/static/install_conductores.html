@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>CTO 119 — Instalar App Conductores</title>
+<link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;500;600;700;800&family=Material+Symbols+Outlined&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Hanken Grotesk',sans-serif;background:#f0f4f8;color:#141a21;min-height:100vh;display:flex;align-items:center;justify-content:center;padding:20px}
+.card{background:#fff;border:1px solid #dbe4ee;border-radius:20px;box-shadow:0 8px 40px rgba(20,35,55,.12);max-width:520px;width:100%;overflow:hidden}
+.header{background:linear-gradient(135deg,#0b3a63 0%,#1d5c9e 100%);padding:28px 24px;color:#fff;text-align:center}
+.header .icon{width:56px;height:56px;background:rgba(255,255,255,.15);border-radius:16px;display:inline-flex;align-items:center;justify-content:center;font-size:28px;margin-bottom:12px}
+.header h1{font-size:22px;font-weight:800;letter-spacing:.5px}
+.header .sub{font-size:13px;opacity:.8;margin-top:4px}
+.body{padding:24px}
+.qr-section{text-align:center;margin-bottom:24px}
+.qr-box{display:inline-block;padding:8px;background:#f8fafc;border:2px solid #e2e8f0;border-radius:10px;margin:8px 0}
+.qr-label{font-size:12px;color:#5b6675;margin-top:8px}
+.url-display{background:#0b3a63;color:#fff;font-family:monospace;font-size:14px;padding:10px 16px;border-radius:8px;word-break:break-all;margin:8px 0;cursor:pointer;transition:background .2s}
+.url-display:hover{background:#1d5c9e}
+.url-display .copy-hint{font-size:10px;opacity:.6;display:block;margin-top:2px;font-family:'Hanken Grotesk',sans-serif}
+.steps{margin:20px 0}
+.steps h3{font-size:14px;font-weight:700;color:#0b3a63;margin-bottom:12px;display:flex;align-items:center;gap:8px}
+.steps h3 .material-symbols-outlined{font-size:20px}
+.step{display:flex;gap:12px;padding:12px 0;border-bottom:1px solid #f0f4f8}
+.step:last-child{border:none}
+.step-num{width:28px;height:28px;background:#0b3a63;color:#fff;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;flex-shrink:0}
+.step-text{font-size:13px;line-height:1.5}
+.step-text strong{color:#0b3a63}
+.tab-row{display:flex;gap:8px;margin-bottom:16px}
+.tab{flex:1;padding:10px;text-align:center;border:1px solid #e2e8f0;border-radius:10px;font-size:13px;font-weight:600;cursor:pointer;transition:all .2s;background:#f8fafc;color:#5b6675}
+.tab.active{background:#0b3a63;color:#fff;border-color:#0b3a63}
+.whatsapp-btn{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;padding:14px;background:#25d366;color:#fff;border:none;border-radius:12px;font-size:15px;font-weight:700;cursor:pointer;font-family:'Hanken Grotesk',sans-serif;transition:opacity .2s;margin-top:16px}
+.whatsapp-btn:hover{opacity:.9}
+.whatsapp-btn .material-symbols-outlined{font-size:22px}
+.info-box{background:#f0faf7;border:1px solid #bfe8dc;border-radius:10px;padding:14px;font-size:13px;color:#0e8a72;margin-top:16px;line-height:1.6}
+.info-box strong{font-weight:700}
+.stats{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:16px}
+.stat{background:#f8fafc;border:1px solid #e2e8f0;border-radius:10px;padding:12px;text-align:center}
+.stat .val{font-size:24px;font-weight:800;color:#0b3a63}
+.stat .lbl{font-size:11px;color:#5b6675;margin-top:2px}
+</style>
+</head>
+<body>
+<div class="card">
+  <div class="header">
+    <div class="icon">📲</div>
+    <h1>Instalar App Conductores</h1>
+    <div class="sub">Cooperativa de Taxis Occidental 119</div>
+  </div>
+  <div class="body">
+    <div class="qr-section">
+      <div class="qr-box"><div id="qr"></div></div>
+      <div class="url-display" id="url-box" onclick="copyUrl()">
+        <span id="url-text"></span>
+        <span class="copy-hint">Toca para copiar</span>
+      </div>
+      <div class="qr-label">Escanea con la cámara del celular para abrir la app</div>
+    </div>
+
+    <a href="/descargar-apk" download class="apk-download-btn" style="display:flex;align-items:center;justify-content:center;gap:10px;width:100%;padding:16px;background:#0b3a63;color:#fff;border-radius:12px;font-size:16px;font-weight:800;text-decoration:none;margin-bottom:16px;box-shadow:0 4px 14px rgba(11,58,99,0.3);transition:transform 0.15s">
+      <span class="material-symbols-outlined" style="font-size:24px">download_for_offline</span>
+      DESCARGAR APP NATIVA (.APK)
+    </a>
+
+    <div class="tab-row">
+      <div class="tab active" id="tab-and" onclick="showTab('and')">🤖 Android (APK / Web)</div>
+      <div class="tab" id="tab-ios" onclick="showTab('ios')">🍎 iPhone (Web)</div>
+    </div>
+
+    <div class="steps" id="steps-and">
+      <h3><span class="material-symbols-outlined">android</span> Pasos para Instalar el APK en Android</h3>
+      <div class="step"><div class="step-num">1</div><div class="step-text">Toca el botón azul de arriba <strong>"DESCARGAR APP NATIVA (.APK)"</strong></div></div>
+      <div class="step"><div class="step-num">2</div><div class="step-text">Al finalizar la descarga, abre el archivo <strong>CTO_Conductor.apk</strong></div></div>
+      <div class="step"><div class="step-num">3</div><div class="step-text">Si aparece el mensaje <em>"Por seguridad, tu teléfono no puede instalar apps desconocidas"</em>, toca en <strong>Ajustes/Configuración</strong> y activa <strong>"Permitir desde esta fuente"</strong></div></div>
+      <div class="step"><div class="step-num">4</div><div class="step-text">Vuelve atrás y presiona <strong>Instalar</strong>. El ícono oficial de CTO 119 aparecerá en tu menú de aplicaciones</div></div>
+      <div class="step"><div class="step-num">5</div><div class="step-text">Abre la app e ingresa con tu <strong>número de unidad (1-79)</strong> y clave (últimos 4 dígitos de tu teléfono)</div></div>
+    </div>
+
+    <div class="steps" id="steps-ios" style="display:none">
+      <h3><span class="material-symbols-outlined">phone_iphone</span> Pasos para iPhone</h3>
+      <div class="step"><div class="step-num">1</div><div class="step-text">Escanea el <strong>QR code</strong> con la cámara del iPhone</div></div>
+      <div class="step"><div class="step-num">2</div><div class="step-text">Toca el enlace para abrirlo en <strong>Safari</strong></div></div>
+      <div class="step"><div class="step-num">3</div><div class="step-text">Toca el ícono de <strong>compartir</strong> ⬆️ abajo</div></div>
+      <div class="step"><div class="step-num">4</div><div class="step-text">Selecciona <strong>"Agregar a pantalla de inicio"</strong></div></div>
+      <div class="step"><div class="step-num">5</div><div class="step-text">Ingresa con tu <strong>número de unidad</strong> y los <strong>últimos 4 dígitos</strong> de tu teléfono</div></div>
+    </div>
+
+    <button class="whatsapp-btn" onclick="sendWhatsApp()">
+      <span class="material-symbols-outlined">chat</span>
+      Enviar enlace por WhatsApp a los conductores
+    </button>
+
+    <div class="info-box">
+      <strong>Credenciales por defecto:</strong><br>
+      Unidad: número del 1 al 79<br>
+      Contraseña: últimos 4 dígitos del teléfono registrado en la cooperativa
+    </div>
+
+    <div class="stats" id="stats-box">
+      <div class="stat"><div class="val" id="st-total">—</div><div class="lbl">Conductores</div></div>
+      <div class="stat"><div class="val" id="st-inst">—</div><div class="lbl">Activos hoy</div></div>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
+<script>
+let serverUrl = '';
+
+function getServerUrl(){
+  return window.location.origin;
+}
+
+function init(){
+  serverUrl = getServerUrl();
+  document.getElementById('url-text').textContent = serverUrl + '/conductor';
+  new QRCode(document.getElementById('qr'), {
+    text: serverUrl + '/conductor',
+    width: 80,
+    height: 80,
+    colorDark: '#0b3a63',
+    colorLight: '#ffffff',
+    correctLevel: QRCode.CorrectLevel.M
+  });
+  loadStats();
+}
+
+function showTab(t){
+  document.getElementById('tab-and').className = t==='and' ? 'tab active' : 'tab';
+  document.getElementById('tab-ios').className = t==='ios' ? 'tab active' : 'tab';
+  document.getElementById('steps-and').style.display = t==='and' ? 'block' : 'none';
+  document.getElementById('steps-ios').style.display = t==='ios' ? 'block' : 'none';
+}
+
+function copyUrl(){
+  const url = serverUrl + '/conductor';
+    navigator.clipboard.writeText(url).then(()=>{
+    document.getElementById('url-text').textContent = 'Copiado!';
+    setTimeout(()=>{ document.getElementById('url-text').textContent = url; }, 2000);
+  }).catch(()=>{
+    // Fallback
+    const ta = document.createElement('textarea');
+    ta.value = url; document.body.appendChild(ta);
+    ta.select(); document.execCommand('copy'); ta.remove();
+    document.getElementById('url-text').textContent = 'Copiado!';
+    setTimeout(()=>{ document.getElementById('url-text').textContent = url; }, 2000);
+  });
+}
+
+function sendWhatsApp(){
+  const url = serverUrl + '/conductor';
+  const msg = encodeURIComponent(
+    'CTO 119 - App del Conductor\n\n' +
+    'Instala la app en tu celular:\n' + url + '\n\n' +
+    'Como instalar:\n' +
+    '1. Abre el enlace con la camara o Safari\n' +
+    '2. Toca los 3 puntos - "Instalar aplicacion"\n' +
+    '3. Usa tu numero de unidad y ultimos 4 digitos de tu telefono\n\n' +
+    'Si tienes problemas, contacta a la central.'
+  );
+  window.open('https://wa.me/?text=' + msg, '_blank');
+}
+
+async function loadStats(){
+  try {
+    const r = await fetch('/api/conductores/stats');
+    const d = await r.json();
+    document.getElementById('st-total').textContent = d.total || '—';
+    document.getElementById('st-inst').textContent = d.activos_hoy || '—';
+  } catch(e){}
+}
+
+init();
+</script>
+</body>
+</html>
